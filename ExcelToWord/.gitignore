@@ -3,3 +3,4 @@ logs/
 lib/
 .classpath
 .project
+.settings
