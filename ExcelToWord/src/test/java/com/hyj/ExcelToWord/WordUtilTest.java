@@ -67,14 +67,14 @@ public class WordUtilTest extends TestCase {
 		log.info("#### done");
 	}
 */
-	public static void testReplaceAll() {
+/*	public static void testWordReplaceAll() {
 		ActiveXComponent wordApp = new ActiveXComponent("Word.Application");
 		wordApp.setProperty("Visible", new Variant(false)); // 不可见打开word
 		wordApp.setProperty("AutomationSecurity", new Variant(3)); // 禁用宏
 
 		Dispatch docs = wordApp.getProperty("Documents").toDispatch();
 
-		Dispatch doc = Dispatch.call(docs, "Open", TEST_FILE_NAME).toDispatch();
+		Dispatch doc = Dispatch.call(docs, "Open", TEST_WORD_FILE_NAME).toDispatch();
 		Dispatch selection = Dispatch.get(wordApp, "Selection").toDispatch();
 
 		while (find(wordApp, selection, REPLACE_STR_1)) {
@@ -82,19 +82,19 @@ public class WordUtilTest extends TestCase {
 			Dispatch.call(selection, "MoveRight");
 		}
 
-		Dispatch.call(Dispatch.call(wordApp, "WordBasic").getDispatch(), "FileSaveAs", TEST_FILE_NAME_1);
+		Dispatch.call(Dispatch.call(wordApp, "WordBasic").getDispatch(), "FileSaveAs", TEST_WORD_FILE_NAME_1);
 
 		//Dispatch.call(doc, "Save");
 		//Dispatch.call(doc, "Close", new Variant(true));
 		Dispatch.call(wordApp, "Quit");
 	}
 
-	private static String TEST_FILE_NAME = "E:\\hyj\\jacobTest.doc";
-	private static String TEST_FILE_NAME_1 = "E:\\hyj\\jacobTest_1.doc";
+	private static String TEST_WORD_FILE_NAME = "E:\\hyj\\jacobTest.doc";
+	private static String TEST_WORD_FILE_NAME_1 = "E:\\hyj\\jacobTest_1.doc";
 
 	private static String REPLACE_STR_1 = "##主题##";
 	private static String REPLACE_STR_1_NEW = "3.14";
-
+*/
 	private static boolean find(ActiveXComponent wordApp, Dispatch selection, String text) {
 		boolean ret = false;
 		if (text == null || text.equals("")) {
@@ -109,5 +109,43 @@ public class WordUtilTest extends TestCase {
 		Dispatch.put(find, "MatchWholeWord", "True");	// 全字匹配
 		ret = Dispatch.call(find, "Execute").getBoolean();	// 查找并选中
 		return ret;
+	}
+
+	private static String TEST_EXCEL_FILE_NAME = "E:\\hyj\\jacobTest.xlsx";
+	public static void testExcelReadWrite() {
+		final boolean isReadOnly = false;
+
+		ActiveXComponent ExcelApp = new ActiveXComponent("Excel.Application");
+		ExcelApp.setProperty("Visible", new Variant(false));	// false为不显示打开Excel
+
+		Dispatch wbs = ExcelApp.getProperty("Workbooks").toDispatch();
+
+		Dispatch wb = Dispatch.invoke(wbs, "Open", Dispatch.Method,
+				new Object[] { TEST_EXCEL_FILE_NAME, new Variant(false), new Variant(isReadOnly) }, // 是否以只读方式打开
+				new int[1]).toDispatch();
+
+		setExcelValue(wb, "sh1", "A1", "2");
+		log.info(getExcelValue(wb, "基础设置","G10"));
+
+		Dispatch.call(wb, "Save");
+		Dispatch.call(wb, "Close", new Variant(false));
+		ExcelApp.invoke("Quit", new Variant[] {});
+	}
+
+	private static void setExcelValue(Dispatch wb, String sheetName ,String pos, String val) {
+		//Dispatch sheet = Dispatch.get(workbook,"ActiveSheet").toDispatch();
+		Dispatch sheets = Dispatch.get(wb, "Sheets").toDispatch();
+		Dispatch sheet = Dispatch.invoke(sheets, "Item", Dispatch.Get, new Object[] { sheetName }, new int[1]).toDispatch();
+		Dispatch cell = Dispatch.invoke(sheet, "Range", Dispatch.Get, new Object[] { pos }, new int[1]).toDispatch();
+		Dispatch.put(cell, "Value", val);
+	}
+
+	private static String getExcelValue(Dispatch wb, String sheetName,String pos) {
+		// sheet = Dispatch.get(workbook,"ActiveSheet").toDispatch();
+		Dispatch sheets = Dispatch.get(wb, "Sheets").toDispatch();
+		Dispatch sheet = Dispatch.invoke(sheets, "Item", Dispatch.Get, new Object[] { new String(sheetName) }, new int[1]).toDispatch();
+		Dispatch cell = Dispatch.invoke(sheet, "Range", Dispatch.Get, new Object[] { pos }, new int[1]).toDispatch();
+		String value = Dispatch.get(cell, "Value").toString();
+		return value;
 	}
 }
