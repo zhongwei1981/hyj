@@ -9,32 +9,32 @@ import com.jacob.com.Variant;
 //注意java操作word关键是定位操作对象;
 /**
  * jacob to R/W MS Word
- * 
+ *
  * @author
  */
-public class Hyj {
-	private static Logger log = Logger.getLogger(Hyj.class.getName());
+public class WordUtil {
+	private static Logger log = Logger.getLogger(WordUtil.class.getName());
 
-	private Dispatch doc; // word doc
-	private ActiveXComponent word; // word运行程序对象
-	private Dispatch documents; // 所有word文档集合
-	private Dispatch selection; // 选定的范围或插入点
+	private Dispatch docDispatch; // word doc
+	private ActiveXComponent wordApp; // word运行程序对象
+	private Dispatch docs; // 所有word文档集合
+	private Dispatch selectionDispatch; // 选定的范围或插入点
 	private boolean saveOnExit = true;
 
-	public Hyj() throws Exception {
-		if (word == null) {
-			word = new ActiveXComponent("Word.Application");
-			word.setProperty("Visible", new Variant(false)); // 不可见打开word
-			word.setProperty("AutomationSecurity", new Variant(3)); // 禁用宏
+	public WordUtil() throws Exception {
+		if (wordApp == null) {
+			wordApp = new ActiveXComponent("Word.Application");
+			wordApp.setProperty("Visible", new Variant(false)); // 不可见打开word
+			wordApp.setProperty("AutomationSecurity", new Variant(3)); // 禁用宏
 		}
-		if (documents == null) {
-			documents = word.getProperty("Documents").toDispatch();
+		if (docs == null) {
+			docs = wordApp.getProperty("Documents").toDispatch();
 		}
 	}
 
 	/**
 	 * 设置退出时参数
-	 * 
+	 *
 	 * @param saveOnExit: boolean true-退出时保存文件，false-退出时不保存文件
 	 */
 	public void setSaveOnExit(boolean saveOnExit) {
@@ -45,24 +45,19 @@ public class Hyj {
 	 * 创建一个新的word文档
 	 */
 	public void createNewDocument() {
-		doc = Dispatch.call(documents, "Add").toDispatch();
-		selection = Dispatch.get(word, "Selection").toDispatch();
+		docDispatch = Dispatch.call(docs, "Add").toDispatch();
+		selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 	}
 
-	/**
-	 * 打开一个已存在的文档
-	 * 
-	 * @param docPath
-	 */
 	public void openDocument(String docPath) {
 		closeDocument();
-		doc = Dispatch.call(documents, "Open", docPath).toDispatch();
-		selection = Dispatch.get(word, "Selection").toDispatch();
+		docDispatch = Dispatch.call(docs, "Open", docPath).toDispatch();
+		selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 	}
 
 	/**
 	 * 只读 打开一个保护文档,
-	 * 
+	 *
 	 * @param docPath-文件全名
 	 * @param pwd-密码
 	 */
@@ -72,31 +67,31 @@ public class Hyj {
 		// new Object[]{docPath, new Variant(false), new Variant(true), new
 		// Variant(true), pwd},
 		// new int[1]).toDispatch();//打开word文件
-		doc = Dispatch.callN(documents, "Open", new Object[] { docPath, new Variant(false), new Variant(true),
+		docDispatch = Dispatch.callN(docs, "Open", new Object[] { docPath, new Variant(false), new Variant(true),
 				new Variant(true), pwd, "", new Variant(false) }).toDispatch();
-		selection = Dispatch.get(word, "Selection").toDispatch();
+		selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 	}
 
 	public void openDocument(String docPath, String pwd) throws Exception {
 		closeDocument();
-		doc = Dispatch
-				.callN(documents, "Open",
+		docDispatch = Dispatch
+				.callN(docs, "Open",
 						new Object[] { docPath, new Variant(false), new Variant(false), new Variant(true), pwd })
 				.toDispatch();
-		selection = Dispatch.get(word, "Selection").toDispatch();
+		selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 	}
 
 	/**
 	 * 把选定的内容或插入点向上移动
-	 * 
+	 *
 	 * @param pos: 移动的距离
 	 */
 	public void moveUp(int pos) {
-		if (selection == null) {
-			selection = Dispatch.get(word, "Selection").toDispatch();
+		if (selectionDispatch == null) {
+			selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 		}
 		for (int i = 0; i < pos; i++) {
-			Dispatch.call(selection, "MoveUp");
+			Dispatch.call(selectionDispatch, "MoveUp");
 		}
 	}
 
@@ -106,11 +101,11 @@ public class Hyj {
 	 * @param pos 移动的距离
 	 */
 	public void moveDown(int pos) {
-		if (selection == null) {
-			selection = Dispatch.get(word, "Selection").toDispatch();
+		if (selectionDispatch == null) {
+			selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 		}
 		for (int i = 0; i < pos; i++) {
-			Dispatch.call(selection, "MoveDown");
+			Dispatch.call(selectionDispatch, "MoveDown");
 		}
 	}
 
@@ -120,11 +115,11 @@ public class Hyj {
 	 * @param pos 移动的距离
 	 */
 	public void moveLeft(int pos) {
-		if (selection == null) {
-			selection = Dispatch.get(word, "Selection").toDispatch();
+		if (selectionDispatch == null) {
+			selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 		}
 		for (int i = 0; i < pos; i++) {
-			Dispatch.call(selection, "MoveLeft");
+			Dispatch.call(selectionDispatch, "MoveLeft");
 		}
 	}
 
@@ -134,11 +129,11 @@ public class Hyj {
 	 * @param pos 移动的距离
 	 */
 	public void moveRight(int pos) {
-		if (selection == null) {
-			selection = Dispatch.get(word, "Selection").toDispatch();
+		if (selectionDispatch == null) {
+			selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 		}
 		for (int i = 0; i < pos; i++) {
-			Dispatch.call(selection, "MoveRight");
+			Dispatch.call(selectionDispatch, "MoveRight");
 		}
 	}
 
@@ -147,10 +142,10 @@ public class Hyj {
 	 *
 	 */
 	public void moveStart() {
-		if (selection == null) {
-			selection = Dispatch.get(word, "Selection").toDispatch();
+		if (selectionDispatch == null) {
+			selectionDispatch = Dispatch.get(wordApp, "Selection").toDispatch();
 		}
-		Dispatch.call(selection, "HomeKey", new Variant(6));
+		Dispatch.call(selectionDispatch, "HomeKey", new Variant(6));
 	}
 
 	/**
@@ -164,47 +159,28 @@ public class Hyj {
 		if (toFindText == null || toFindText.equals("")) {
 			return false;
 		}
-		// 从selection所在位置开始查询
-		Dispatch find = word.call(selection, "Find").toDispatch();
-		// 设置要查找的内容
-		Dispatch.put(find, "Text", toFindText);
-		// 向前查找
-		Dispatch.put(find, "Forward", "True");
-		// 设置格式
-		Dispatch.put(find, "Format", "True");
-		// 大小写匹配
-		Dispatch.put(find, "MatchCase", "True");
-		// 全字匹配
-		Dispatch.put(find, "MatchWholeWord", "True");
-		// 查找并选中
-		return Dispatch.call(find, "Execute").getBoolean();
+
+		Dispatch find = wordApp.call(selectionDispatch, "Find").toDispatch();	// 从selection所在位置开始查询
+		Dispatch.put(find, "Text", toFindText);		// 设置要查找的内容
+		Dispatch.put(find, "Forward", "True");		// 向前查找
+		Dispatch.put(find, "Format", "True");		// 设置格式
+		Dispatch.put(find, "MatchCase", "True");	// 大小写匹配
+		Dispatch.put(find, "MatchWholeWord", "True");	// 全字匹配
+		return Dispatch.call(find, "Execute").getBoolean();	// 查找并选中
 	}
 
-	/**
-	 * 把选定选定内容设定为替换文本
-	 *
-	 * @param toFindText 查找字符串
-	 * @param newText    要替换的内容
-	 * @return
-	 */
 	public boolean replaceText(String toFindText, String newText) {
 		if (!find(toFindText)) {
 			return false;
 		}
-		Dispatch.put(selection, "Text", newText);
+		Dispatch.put(selectionDispatch, "Text", newText);
 		return true;
 	}
 
-	/**
-	 * 全局替换文本
-	 *
-	 * @param toFindText 查找字符串
-	 * @param newText    要替换的内容
-	 */
 	public void replaceAllText(String toFindText, String newText) {
 		while (find(toFindText)) {
-			Dispatch.put(selection, "Text", newText);
-			Dispatch.call(selection, "MoveRight");
+			Dispatch.put(selectionDispatch, "Text", newText);
+			Dispatch.call(selectionDispatch, "MoveRight");
 		}
 	}
 
@@ -214,7 +190,7 @@ public class Hyj {
 	 * @param newText 要插入的新字符串
 	 */
 	public void insertText(String newText) {
-		Dispatch.put(selection, "Text", newText);
+		Dispatch.put(selectionDispatch, "Text", newText);
 	}
 
 	/**
@@ -227,7 +203,7 @@ public class Hyj {
 		if (!find(toFindText)) {
 			return false;
 		}
-		Dispatch.call(Dispatch.get(selection, "InLineShapes").toDispatch(), "AddPicture", imagePath);
+		Dispatch.call(Dispatch.get(selectionDispatch, "InLineShapes").toDispatch(), "AddPicture", imagePath);
 		return true;
 	}
 
@@ -239,8 +215,8 @@ public class Hyj {
 	 */
 	public void replaceAllImage(String toFindText, String imagePath) {
 		while (find(toFindText)) {
-			Dispatch.call(Dispatch.get(selection, "InLineShapes").toDispatch(), "AddPicture", imagePath);
-			Dispatch.call(selection, "MoveRight");
+			Dispatch.call(Dispatch.get(selectionDispatch, "InLineShapes").toDispatch(), "AddPicture", imagePath);
+			Dispatch.call(selectionDispatch, "MoveRight");
 		}
 	}
 
@@ -250,7 +226,7 @@ public class Hyj {
 	 * @param imagePath 图片路径
 	 */
 	public void insertImage(String imagePath) {
-		Dispatch.call(Dispatch.get(selection, "InLineShapes").toDispatch(), "AddPicture", imagePath);
+		Dispatch.call(Dispatch.get(selectionDispatch, "InLineShapes").toDispatch(), "AddPicture", imagePath);
 	}
 
 	/**
@@ -264,7 +240,7 @@ public class Hyj {
 	 */
 	public void mergeCell(int tableIndex, int fstCellRowIdx, int fstCellColIdx, int secCellRowIdx, int secCellColIdx) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		Dispatch fstCell = Dispatch.call(table, "Cell", new Variant(fstCellRowIdx), new Variant(fstCellColIdx))
@@ -284,12 +260,12 @@ public class Hyj {
 	 */
 	public void putTxtToCell(int tableIndex, int cellRowIdx, int cellColIdx, String txt) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		Dispatch cell = Dispatch.call(table, "Cell", new Variant(cellRowIdx), new Variant(cellColIdx)).toDispatch();
 		Dispatch.call(cell, "Select");
-		Dispatch.put(selection, "Text", txt);
+		Dispatch.put(selectionDispatch, "Text", txt);
 	}
 
 	/**
@@ -302,26 +278,26 @@ public class Hyj {
 	 */
 	public String getTxtFromCell(int tableIndex, int cellRowIdx, int cellColIdx) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		Dispatch cell = Dispatch.call(table, "Cell", new Variant(cellRowIdx), new Variant(cellColIdx)).toDispatch();
 		Dispatch.call(cell, "Select");
 		String ret = "";
-		ret = Dispatch.get(selection, "Text").toString();
+		ret = Dispatch.get(selectionDispatch, "Text").toString();
 		ret = ret.substring(0, ret.length() - 1); // 去掉最后的回车符;
 		return ret;
 	}
 
 	/**
 	 * 在当前文档拷贝剪贴板数据
-	 * 
+	 *
 	 * @param pos
 	 */
 	public void pasteExcelSheet(String pos) {
 		moveStart();
 		if (this.find(pos)) {
-			Dispatch textRange = Dispatch.get(selection, "Range").toDispatch();
+			Dispatch textRange = Dispatch.get(selectionDispatch, "Range").toDispatch();
 			Dispatch.call(textRange, "Paste");
 		}
 	}
@@ -334,13 +310,13 @@ public class Hyj {
 	 */
 	public void copyTable(String pos, int tableIndex) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		Dispatch range = Dispatch.get(table, "Range").toDispatch();
 		Dispatch.call(range, "Copy");
 		if (this.find(pos)) {
-			Dispatch textRange = Dispatch.get(selection, "Range").toDispatch();
+			Dispatch textRange = Dispatch.get(selectionDispatch, "Range").toDispatch();
 			Dispatch.call(textRange, "Paste");
 		}
 	}
@@ -355,7 +331,7 @@ public class Hyj {
 	public void copyTableFromAnotherDoc(String anotherDocPath, int tableIndex, String pos) {
 		Dispatch doc2 = null;
 		try {
-			doc2 = Dispatch.call(documents, "Open", anotherDocPath).toDispatch();
+			doc2 = Dispatch.call(docs, "Open", anotherDocPath).toDispatch();
 			// 所有表格
 			Dispatch tables = Dispatch.get(doc2, "Tables").toDispatch();
 			// 要填充的表格
@@ -363,7 +339,7 @@ public class Hyj {
 			Dispatch range = Dispatch.get(table, "Range").toDispatch();
 			Dispatch.call(range, "Copy");
 			if (this.find(pos)) {
-				Dispatch textRange = Dispatch.get(selection, "Range").toDispatch();
+				Dispatch textRange = Dispatch.get(selectionDispatch, "Range").toDispatch();
 				Dispatch.call(textRange, "Paste");
 			}
 		} catch (Exception e) {
@@ -386,13 +362,13 @@ public class Hyj {
 	public void copyImageFromAnotherDoc(String anotherDocPath, int shapeIndex, String pos) {
 		Dispatch doc2 = null;
 		try {
-			doc2 = Dispatch.call(documents, "Open", anotherDocPath).toDispatch();
+			doc2 = Dispatch.call(docs, "Open", anotherDocPath).toDispatch();
 			Dispatch shapes = Dispatch.get(doc2, "InLineShapes").toDispatch();
 			Dispatch shape = Dispatch.call(shapes, "Item", new Variant(shapeIndex)).toDispatch();
 			Dispatch imageRange = Dispatch.get(shape, "Range").toDispatch();
 			Dispatch.call(imageRange, "Copy");
 			if (this.find(pos)) {
-				Dispatch textRange = Dispatch.get(selection, "Range").toDispatch();
+				Dispatch textRange = Dispatch.get(selectionDispatch, "Range").toDispatch();
 				Dispatch.call(textRange, "Paste");
 			}
 		} catch (Exception e) {
@@ -414,19 +390,19 @@ public class Hyj {
 	 */
 	public void createTable(String pos, int numCols, int numRows) {
 		if (find(pos)) {
-			Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
-			Dispatch range = Dispatch.get(selection, "Range").toDispatch();
+			Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
+			Dispatch range = Dispatch.get(selectionDispatch, "Range").toDispatch();
 			@SuppressWarnings("unused")
 			Dispatch newTable = Dispatch.call(tables, "Add", range, new Variant(numRows), new Variant(numCols))
 					.toDispatch();
-			Dispatch.call(selection, "MoveRight");
+			Dispatch.call(selectionDispatch, "MoveRight");
 		} else {
-			Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
-			Dispatch range = Dispatch.get(selection, "Range").toDispatch();
+			Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
+			Dispatch range = Dispatch.get(selectionDispatch, "Range").toDispatch();
 			@SuppressWarnings("unused")
 			Dispatch newTable = Dispatch.call(tables, "Add", range, new Variant(numRows), new Variant(numCols))
 					.toDispatch();
-			Dispatch.call(selection, "MoveRight");
+			Dispatch.call(selectionDispatch, "MoveRight");
 		}
 	}
 
@@ -438,7 +414,7 @@ public class Hyj {
 	 */
 	public void addTableRow(int tableIndex, int rowIndex) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -454,7 +430,7 @@ public class Hyj {
 	 */
 	public void addFirstTableRow(int tableIndex) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -470,7 +446,7 @@ public class Hyj {
 	 */
 	public void addLastTableRow(int tableIndex) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -485,7 +461,7 @@ public class Hyj {
 	 * @param tableIndex word文档中的第N张表(从1开始)
 	 */
 	public void addRow(int tableIndex) {
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -500,7 +476,7 @@ public class Hyj {
 	 */
 	public void addCol(int tableIndex) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -517,7 +493,7 @@ public class Hyj {
 	 */
 	public void addTableCol(int tableIndex, int colIndex) {
 		// 所有表格
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -535,7 +511,7 @@ public class Hyj {
 	 * @param tableIndex word文档中的第N张表(从1开始)
 	 */
 	public void addFirstTableCol(int tableIndex) {
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -551,7 +527,7 @@ public class Hyj {
 	 * @param tableIndex word文档中的第N张表(从1开始)
 	 */
 	public void addLastTableCol(int tableIndex) {
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		// 要填充的表格
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		// 表格的所有行
@@ -567,7 +543,7 @@ public class Hyj {
 	 */
 	@SuppressWarnings("deprecation")
 	public void autoFitTable() {
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		int count = Dispatch.get(tables, "Count").toInt();
 		for (int i = 0; i < count; i++) {
 			Dispatch table = Dispatch.call(tables, "Item", new Variant(i + 1)).toDispatch();
@@ -582,7 +558,7 @@ public class Hyj {
 	 */
 	@SuppressWarnings("deprecation")
 	public void callWordMacro() {
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		int count = Dispatch.get(tables, "Count").toInt();
 		Variant vMacroName = new Variant("Normal.NewMacros.tableFit");
 		@SuppressWarnings("unused")
@@ -592,7 +568,7 @@ public class Hyj {
 		for (int i = 0; i < count; i++) {
 			Dispatch table = Dispatch.call(tables, "Item", new Variant(i + 1)).toDispatch();
 			Dispatch.call(table, "Select");
-			Dispatch.call(word, "Run", "tableFitContent");
+			Dispatch.call(wordApp, "Run", "tableFitContent");
 		}
 	}
 
@@ -607,7 +583,7 @@ public class Hyj {
 	 * @param name          字体名称
 	 */
 	public void setFont(boolean bold, boolean italic, boolean underLine, String colorSize, String size, String name) {
-		Dispatch font = Dispatch.get(selection, "Font").toDispatch();
+		Dispatch font = Dispatch.get(selectionDispatch, "Font").toDispatch();
 		Dispatch.put(font, "Name", new Variant(name));
 		Dispatch.put(font, "Bold", new Variant(bold));
 		Dispatch.put(font, "Italic", new Variant(italic));
@@ -624,7 +600,7 @@ public class Hyj {
 	 * @param cellColIdx
 	 */
 	public void setTableCellSelected(int tableIndex, int cellRowIdx, int cellColIdx) {
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		Dispatch table = Dispatch.call(tables, "Item", new Variant(tableIndex)).toDispatch();
 		Dispatch cell = Dispatch.call(table, "Cell", new Variant(cellRowIdx), new Variant(cellColIdx)).toDispatch();
 		Dispatch.call(cell, "Select");
@@ -632,11 +608,11 @@ public class Hyj {
 
 	/**
 	 * 设置选定单元格的垂直对起方式, 请使用setTableCellSelected选中一个单元格
-	 * 
+	 *
 	 * @param align 0-顶端, 1-居中, 3-底端
 	 */
 	public void setCellVerticalAlign(int verticalAlign) {
-		Dispatch cells = Dispatch.get(selection, "Cells").toDispatch();
+		Dispatch cells = Dispatch.get(selectionDispatch, "Cells").toDispatch();
 		Dispatch.put(cells, "VerticalAlignment", new Variant(verticalAlign));
 	}
 
@@ -645,7 +621,7 @@ public class Hyj {
 	 */
 	@SuppressWarnings("deprecation")
 	public void setApplyTableFormat() {
-		Dispatch tables = Dispatch.get(doc, "Tables").toDispatch();
+		Dispatch tables = Dispatch.get(docDispatch, "Tables").toDispatch();
 		int tabCount = Integer.valueOf(Dispatch.get(tables, "Count").toString()); // log.info(tabCount);
 		log.info("*******************************************************");
 		for (int i = 1; i <= tabCount; i++) {
@@ -679,7 +655,7 @@ public class Hyj {
 	 */
 	public void setParagraphsProperties(int alignment, int lineSpaceingRule, int lineUnitBefore, int lineUnitAfter,
 			int characterUnitFirstLineIndent) {
-		Dispatch paragraphs = Dispatch.get(selection, "Paragraphs").toDispatch();
+		Dispatch paragraphs = Dispatch.get(selectionDispatch, "Paragraphs").toDispatch();
 		Dispatch.put(paragraphs, "Alignment", new Variant(alignment)); // 对齐方式
 		Dispatch.put(paragraphs, "LineSpacingRule", new Variant(lineSpaceingRule)); // 行距
 		Dispatch.put(paragraphs, "LineUnitBefore", new Variant(lineUnitBefore)); // 段前
@@ -691,7 +667,7 @@ public class Hyj {
 	 * 打印当前段落格式, 使用前,请先选中段落
 	 */
 	public void getParagraphsProperties() {
-		Dispatch paragraphs = Dispatch.get(selection, "Paragraphs").toDispatch();
+		Dispatch paragraphs = Dispatch.get(selectionDispatch, "Paragraphs").toDispatch();
 		String val = Dispatch.get(paragraphs, "LineSpacingRule").toString(); // 行距
 		log.info("行距:" + val);
 		val = Dispatch.get(paragraphs, "Alignment").toString(); // 对齐方式
@@ -706,13 +682,8 @@ public class Hyj {
 		log.info("首行缩进字符数:" + val);
 	}
 
-	/**
-	 * 文件保存或另存为
-	 *
-	 * @param savePath 保存或另存为路径
-	 */
-	public void save(String savePath) {
-		Dispatch.call(Dispatch.call(word, "WordBasic").getDispatch(), "FileSaveAs", savePath);
+	public void saveAs(String newPath) {
+		Dispatch.call(Dispatch.call(wordApp, "WordBasic").getDispatch(), "FileSaveAs", newPath);
 	}
 
 	/**
@@ -722,17 +693,17 @@ public class Hyj {
 	 * @param htmlPath
 	 */
 	public void saveAsHtml(String htmlPath) {
-		Dispatch.invoke(doc, "SaveAs", Dispatch.Method, new Object[] { htmlPath, new Variant(8) }, new int[1]);
+		Dispatch.invoke(docDispatch, "SaveAs", Dispatch.Method, new Object[] { htmlPath, new Variant(8) }, new int[1]);
 	}
 
 	/**
 	 * 关闭文档
-	 * 
+	 *
 	 * @param val 0不保存修改 -1 保存修改 -2 提示是否保存修改
 	 */
 	public void closeDocument(int val) {
-		Dispatch.call(doc, "Close", new Variant(val));
-		doc = null;
+		Dispatch.call(docDispatch, "Close", new Variant(val));
+		docDispatch = null;
 	}
 
 	/**
@@ -740,17 +711,17 @@ public class Hyj {
 	 *
 	 */
 	public void closeDocument() {
-		if (doc != null) {
-			Dispatch.call(doc, "Save");
-			Dispatch.call(doc, "Close", new Variant(saveOnExit));
-			doc = null;
+		if (docDispatch != null) {
+			Dispatch.call(docDispatch, "Save");
+			Dispatch.call(docDispatch, "Close", new Variant(saveOnExit));
+			docDispatch = null;
 		}
 	}
 
 	public void closeDocumentWithoutSave() {
-		if (doc != null) {
-			Dispatch.call(doc, "Close", new Variant(false));
-			doc = null;
+		if (docDispatch != null) {
+			Dispatch.call(docDispatch, "Close", new Variant(false));
+			docDispatch = null;
 		}
 	}
 
@@ -760,12 +731,12 @@ public class Hyj {
 	 */
 	public void close() {
 		// closeDocument();
-		if (word != null) {
-			Dispatch.call(word, "Quit");
-			word = null;
+		if (wordApp != null) {
+			Dispatch.call(wordApp, "Quit");
+			wordApp = null;
 		}
-		selection = null;
-		documents = null;
+		selectionDispatch = null;
+		docs = null;
 	}
 
 	/**
@@ -773,8 +744,8 @@ public class Hyj {
 	 *
 	 */
 	public void printFile() {
-		if (doc != null) {
-			Dispatch.call(doc, "PrintOut");
+		if (docDispatch != null) {
+			Dispatch.call(docDispatch, "PrintOut");
 		}
 	}
 
@@ -787,47 +758,47 @@ public class Hyj {
 	 *
 	 */
 	public void protectedWord(String pwd) {
-		String protectionType = Dispatch.get(doc, "ProtectionType").toString();
+		String protectionType = Dispatch.get(docDispatch, "ProtectionType").toString();
 		if (protectionType.equals("-1")) {
-			Dispatch.call(doc, "Protect", new Variant(3), new Variant(true), pwd);
+			Dispatch.call(docDispatch, "Protect", new Variant(3), new Variant(true), pwd);
 		}
 	}
 
 	/**
 	 * 解除文档保护,如果存在
-	 * 
+	 *
 	 * @param pwd WdProtectionType 常量之一(Long 类型，只读)：
 	 *            1-wdAllowOnlyComments,2-wdAllowOnlyFormFields、
 	 *            0-wdAllowOnlyRevisions,-1-wdNoProtection, 3-wdAllowOnlyReading
 	 *
 	 */
 	public void unProtectedWord(String pwd) {
-		String protectionType = Dispatch.get(doc, "ProtectionType").toString();
+		String protectionType = Dispatch.get(docDispatch, "ProtectionType").toString();
 		if (protectionType.equals("3")) {
-			Dispatch.call(doc, "Unprotect", pwd);
+			Dispatch.call(docDispatch, "Unprotect", pwd);
 		}
 	}
 
 	/**
 	 * 设置word文档安全级别
-	 * 
+	 *
 	 * @param value 1-msoAutomationSecurityByUI 使用“安全”对话框指定的安全设置。
 	 *              2-msoAutomationSecurityForceDisable 在程序打开的所有文件中禁用所有宏，而不显示任何安全提醒。
 	 *              3-msoAutomationSecurityLow 启用所有宏，这是启动应用程序时的默认值。
 	 */
 	public void setAutomationSecurity(int value) {
-		word.setProperty("AutomationSecurity", new Variant(value));
+		wordApp.setProperty("AutomationSecurity", new Variant(value));
 	}
 
 	/**
 	 * 读取文档中第paragraphsIndex段文字的内容;
-	 * 
+	 *
 	 * @param paragraphsIndex
 	 * @return
 	 */
 	public String getParagraphs(int paragraphsIndex) {
 		String ret = "";
-		Dispatch paragraphs = Dispatch.get(doc, "Paragraphs").toDispatch(); // 所有段落
+		Dispatch paragraphs = Dispatch.get(docDispatch, "Paragraphs").toDispatch(); // 所有段落
 		int paragraphCount = Dispatch.get(paragraphs, "Count").getInt(); // 一共的段落数
 		Dispatch paragraph = null;
 		Dispatch range = null;
