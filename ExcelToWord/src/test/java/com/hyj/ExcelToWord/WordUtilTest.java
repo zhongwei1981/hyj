@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Dispatch;
-import com.jacob.com.Variant;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -112,7 +111,7 @@ public class WordUtilTest extends TestCase {
 	}
 
 	private static String TEST_EXCEL_FILE_NAME = "E:\\hyj\\jacobTest.xlsx";
-	public static void testExcelReadWrite() {
+/*	public static void testExcelReadWrite() {
 		final boolean isReadOnly = false;
 
 		ActiveXComponent ExcelApp = new ActiveXComponent("Excel.Application");
@@ -131,7 +130,7 @@ public class WordUtilTest extends TestCase {
 		Dispatch.call(wb, "Close", new Variant(false));
 		ExcelApp.invoke("Quit", new Variant[] {});
 	}
-
+*/
 	private static void setExcelValue(Dispatch wb, String sheetName ,String pos, String val) {
 		//Dispatch sheet = Dispatch.get(workbook,"ActiveSheet").toDispatch();
 		Dispatch sheets = Dispatch.get(wb, "Sheets").toDispatch();
