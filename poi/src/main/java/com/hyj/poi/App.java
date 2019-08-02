@@ -3,6 +3,7 @@ package com.hyj.poi;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.hwpf.usermodel.Bookmark;
 import org.apache.poi.hwpf.usermodel.Bookmarks;
+import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -76,12 +78,12 @@ public class App {
 
 		// Word -- OOXML
 		if (false) {
-			MSWordTool changer = new MSWordTool();
-			changer.setTemplate(TEST_WORD);
-			Map<String,String> content = new HashMap<>();
-			content.put(key, "3.14");
-			changer.replaceBookMark(content);
-			changer.saveAs(TEST_WORD_1);
+			MSWordTool tool = new MSWordTool();
+			tool.setTemplate(TEST_WORD);
+			Map<String, String> mapToReplace = new HashMap<>();
+			mapToReplace.put(key, "3.14");
+			tool.replaceBookMark(mapToReplace);
+			tool.saveAs(TEST_WORD_1);
 		}
 	}
 
@@ -94,19 +96,35 @@ public class App {
 			log.info("#### 0. " + document.getDocumentText());
 			Bookmarks bms = document.getBookmarks();
 			log.info("#### 1. " + bms.getBookmarksCount());
-			for(int i = 0; i < bms.getBookmarksCount(); i++) {
+			for (int i = 0; i < bms.getBookmarksCount(); i++) {
 				Bookmark bm = bms.getBookmark(i);
 				log.info(String.format("#### 2. %s, %d, %d", bm.getName(), bm.getStart(), bm.getEnd()));
 			}
+
+			Range range = document.getRange();
+			//读取word文本内容
+			log.info(range.text());
+			HashMap<String, String> map = new HashMap<>();
+			map.put("key", "这是标题");
+			//替换文本内容
+			map.forEach((k, v) -> {
+				range.replaceText(k, v);
+			});
+
 			WordExtractor extractor = new WordExtractor(document);
 			String[] contextArray = extractor.getParagraphText();
-//			Arrays.asList(contextArray).forEach(context -> contextList.add(CharMatcher.whitespace().removeFrom(context)));
+			//			Arrays.asList(contextArray).forEach(context -> contextList.add(CharMatcher.whitespace().removeFrom(context)));
 			extractor.close();
+
+			FileOutputStream fos = new FileOutputStream(TEST_WORD_1);
+			document.write(fos);
+			fos.close();
+
 			document.close();
 		} else if (path.endsWith(".docx")) {
 			XWPFDocument document = new XWPFDocument(stream).getXWPFDocument();
 			List<XWPFParagraph> paragraphList = document.getParagraphs();
-//			paragraphList.forEach(paragraph -> contextList.add(CharMatcher.whitespace().removeFrom(paragraph.getParagraphText())));
+			//			paragraphList.forEach(paragraph -> contextList.add(CharMatcher.whitespace().removeFrom(paragraph.getParagraphText())));
 			document.close();
 		} else {
 			log.info("not word doc:" + path);
