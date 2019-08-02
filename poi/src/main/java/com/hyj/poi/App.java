@@ -1,7 +1,11 @@
 package com.hyj.poi;
 
+import org.apache.log4j.Logger;
+
 public class App {
+	private static Logger log = Logger.getLogger(App.class.getName());
+
 	public static void main(String[] args) {
-		System.out.println("Hello World!");
+		log.info("## Hello World!");
 	}
 }
