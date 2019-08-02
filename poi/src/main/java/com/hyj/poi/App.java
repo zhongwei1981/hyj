@@ -16,7 +16,6 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.hwpf.usermodel.Bookmark;
 import org.apache.poi.hwpf.usermodel.Bookmarks;
 import org.apache.poi.hwpf.usermodel.Range;
@@ -46,12 +45,15 @@ import com.hyj.poi.word.OOXML.MSWordTool;
 public class App {
 	private static Logger log = Logger.getLogger(App.class.getName());
 
-	private static String TEST_EXCEL = "D:\\zhongwei\\hyj\\test.xls";
+	private static String TEST_DIR = "E:\\hyj\\";
+
+	private static String TEST_EXCEL = TEST_DIR + "test.xls";
 	private static String sheetName = "Sheet1";
 
-	private static String TEST_WORD = "D:\\zhongwei\\hyj\\jacobTest.doc";
-	private static String TEST_WORD_1 = "D:\\zhongwei\\hyj\\jacobTest_1.doc";
+	private static String TEST_WORD = TEST_DIR + "jacobTest.doc";
+	private static String TEST_WORD_1 = TEST_DIR + "jacobTest_1.doc";
 	private static String key = "##主题##";
+	private static String val = "这是标题";
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		log.info("## Hello World!");
@@ -93,7 +95,9 @@ public class App {
 		stream = new FileInputStream(new File(path));
 		if (path.endsWith(".doc")) {
 			HWPFDocument document = new HWPFDocument(stream);
+
 			log.info("#### 0. " + document.getDocumentText());
+
 			Bookmarks bms = document.getBookmarks();
 			log.info("#### 1. " + bms.getBookmarksCount());
 			for (int i = 0; i < bms.getBookmarksCount(); i++) {
@@ -103,18 +107,19 @@ public class App {
 
 			Range range = document.getRange();
 			//读取word文本内容
-			log.info(range.text());
+			log.info("#### orig range.text() = " + range.text());
 			HashMap<String, String> map = new HashMap<>();
-			map.put("key", "这是标题");
+			map.put(key, val);
 			//替换文本内容
 			map.forEach((k, v) -> {
 				range.replaceText(k, v);
 			});
+			log.info("#### new range.text() = " + range.text());
 
-			WordExtractor extractor = new WordExtractor(document);
+			/*WordExtractor extractor = new WordExtractor(document);
 			String[] contextArray = extractor.getParagraphText();
-			//			Arrays.asList(contextArray).forEach(context -> contextList.add(CharMatcher.whitespace().removeFrom(context)));
-			extractor.close();
+			Arrays.asList(contextArray).forEach(context -> contextList.add(CharMatcher.whitespace().removeFrom(context)));
+			extractor.close();*/
 
 			FileOutputStream fos = new FileOutputStream(TEST_WORD_1);
 			document.write(fos);
