@@ -14,7 +14,8 @@ public class ExcelSheetForReplace {
 	private static Logger log = Logger.getLogger(ExcelSheetForReplace.class.getName());
 
 	private static int COL_INDEX_KEY = 0;
-	private static int COL_INDEX_VALUE = 1;
+	private static int COL_INDEX_REPLACE_SHEET = 1;
+	private static int COL_INDEX_REPLACE_ROW_COL = 2;
 
 	FileInputStream fis;
 	HSSFWorkbook wb;
@@ -31,20 +32,22 @@ public class ExcelSheetForReplace {
 		fis.close();
 	}
 
-	public HashMap<String, String> getReplaceMap(int rowNum) {
-		HashMap<String, String> replaceMap = new HashMap<>();
+	public HashMap<String, ReplaceData> getReplaceDataMap(int rowNum) {
+		HashMap<String, ReplaceData> replaceDataMap = new HashMap<>();
 
 		for(int row = 0; row < rowNum; row++) {
 			String key = getSheetCellAsString(sheet, row, COL_INDEX_KEY);
-			String val = getSheetCellAsString(sheet, row, COL_INDEX_VALUE);
+			String replaceSheet = getSheetCellAsString(sheet, row, COL_INDEX_REPLACE_SHEET);
+			String replaceRowCol = getSheetCellAsString(sheet, row, COL_INDEX_REPLACE_ROW_COL);
 			//log.info(String.format("#### %d: (%s, %s)", row, key, val));
-			replaceMap.put(key, val);
+			replaceDataMap.put(key, new ReplaceData(replaceSheet, replaceRowCol));
 		}
 
-		return replaceMap;
+		return replaceDataMap;
 	}
 
 	private static String getSheetCellAsString(HSSFSheet sheet, int row, int col) {
+		//log.info(String.format("#### (%s, %d, %d)", "sheet", row, col));
 		String ret = "";
 
 		HSSFCell cell = sheet.getRow(row).getCell(col);

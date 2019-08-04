@@ -13,21 +13,25 @@ public class App {
 	private static final String EXCEL_SUFFIX = ".xls";
 	private static final String WORD_SUFFIX = ".doc";
 
+	private static final int ARG_WORK_DIR_INDEX = 0;
+	private static final int ARG_WORD_TEMPLATE_INDEX = 1;
+	private static final int ARG_EXCEL_OF_DATA_INDEX = 2;
+	private static final int ARG_EXCEL_FOR_REPLACE_INDEX = 3;
+	private static final int ARG_EXCEL_FOR_REPLACE_SHEET_INDEX = 4;
+	private static final int ARG_EXCEL_FOR_REPLACE_ROW_NUM_INDEX = 5;
+
 	private static String argWorkDir = ".\\";	// By default, use current dir
 	private static String argWordTemplateName;
+
+	private static String argExcelOfDataName;
 
 	private static String argExcelForReplaceName;
 	private static String argExcelForReplaceSheetName;
 	private static int argExcelForReplaceRowNum;
 
 	/**
-	 * Replace word by excel, ex [E:\hyj\, WordTemplate.doc, ExcelForReplace.xls, Sheet2, 3].
-	 * @param args
-	 * 		0 - working dir
-	 * 		1 - word path
-	 * 		2 - excel path
-	 * 		3 - excel sheet name
-	 * 		4 - excel sheet cell row num, ex 3
+	 * Replace word by excel.
+	 * @param args, E:\hyj\ WordTemplate.doc ExcelOfData.xls ExcelForReplace.xls Sheet2 3
 	 * @throws IOException
 	 */
 	public static void  main(String[] args) throws IOException {
@@ -41,18 +45,24 @@ public class App {
 		}
 
 		// Excel for replace
-		//FIXME: v = double -> String -> double
-		String excelFilePath = getFilePath(argExcelForReplaceName, EXCEL_SUFFIX);
-
-		ExcelSheetForReplace excelSheetForReplace = new ExcelSheetForReplace(excelFilePath, argExcelForReplaceSheetName);
-		HashMap<String, String> replaceMap = excelSheetForReplace.getReplaceMap(argExcelForReplaceRowNum);
+		String excelForReplaceFilePath = getFilePath(argExcelForReplaceName, EXCEL_SUFFIX);
+		log.info(String.format("#### (%s, %s)", excelForReplaceFilePath, argExcelForReplaceSheetName));
+		ExcelSheetForReplace excelSheetForReplace = new ExcelSheetForReplace(excelForReplaceFilePath, argExcelForReplaceSheetName);
+		HashMap<String, ReplaceData> replaceDataMap = excelSheetForReplace.getReplaceDataMap(argExcelForReplaceRowNum);
 		excelSheetForReplace.close();
+
+		// Excel of Data
+		String excelOfDataFilePath = getFilePath(argExcelOfDataName, EXCEL_SUFFIX);
+		log.info(String.format("#### (%s)", excelOfDataFilePath));
+		ExcelOfData excelOfData = new ExcelOfData(excelOfDataFilePath);
+		HashMap<String, String> replaceMap = excelOfData.getReplaceMap(replaceDataMap);
+		excelOfData.close();
 
 		// Word template
 		String wordTemplatePath = getFilePath(argWordTemplateName, WORD_SUFFIX);
 		String newWordName = argWordTemplateName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String newPath = getFilePath(newWordName, WORD_SUFFIX);
-
+		log.info(String.format("#### (%s)", wordTemplatePath));
 		WordTemplate wordTemplate = new WordTemplate(wordTemplatePath);
 		wordTemplate.replaceRange(replaceMap);
 		wordTemplate.saveAs(newPath);
@@ -68,40 +78,50 @@ public class App {
 			log.info(String.format("%d: %s", i, args[i]));
 		}
 
-		// args[0]
-		argWorkDir = args[0];
+		// ARG_WORK_DIR_INDEX
+		argWorkDir = args[ARG_WORK_DIR_INDEX];
 		if (!argWorkDir.endsWith("\\")) {
 			argWorkDir += "\\";
 		}
 
-		// args[1]
-		argWordTemplateName = args[1];
+		// ARG_WORD_TEMPLATE_INDEX
+		argWordTemplateName = args[ARG_WORD_TEMPLATE_INDEX];
 		if (!argWordTemplateName.endsWith(WORD_SUFFIX)) {
-			log.error(String.format("[1] Only %s is allowed, but received %s.",
-					WORD_SUFFIX, argWordTemplateName));
+			log.error(String.format("[%d] Only %s is allowed, but received %s.",
+					ARG_WORD_TEMPLATE_INDEX, WORD_SUFFIX, argWordTemplateName));
 			return false;
 		}
 		argWordTemplateName = argWordTemplateName.substring(0,
 				argWordTemplateName.length() - WORD_SUFFIX.length());
 
-		// args[2]
-		argExcelForReplaceName = args[2];
+		// ARG_EXCEL_OF_DATA_INDEX
+		argExcelOfDataName = args[ARG_EXCEL_OF_DATA_INDEX];
+		if (!argExcelOfDataName.endsWith(EXCEL_SUFFIX)) {
+			log.error(String.format("[%d] Only %s is allowed, but received %s.",
+					ARG_EXCEL_OF_DATA_INDEX, EXCEL_SUFFIX, argExcelOfDataName));
+			return false;
+		}
+		argExcelOfDataName = argExcelOfDataName.substring(0,
+				argExcelOfDataName.length() - EXCEL_SUFFIX.length());
+
+		// ARG_EXCEL_FOR_REPLACE_INDEX
+		argExcelForReplaceName = args[ARG_EXCEL_FOR_REPLACE_INDEX];
 		if (!argExcelForReplaceName.endsWith(EXCEL_SUFFIX)) {
-			log.error(String.format("[2] Only %s is allowed, but received %s.",
-					EXCEL_SUFFIX, argExcelForReplaceName));
+			log.error(String.format("[%d] Only %s is allowed, but received %s.",
+					ARG_EXCEL_FOR_REPLACE_INDEX, EXCEL_SUFFIX, argExcelForReplaceName));
 			return false;
 		}
 		argExcelForReplaceName = argExcelForReplaceName.substring(0,
 				argExcelForReplaceName.length() - EXCEL_SUFFIX.length());
 
-		// args[3]
-		argExcelForReplaceSheetName = args[3];
+		// ARG_EXCEL_FOR_REPLACE_INDEX
+		argExcelForReplaceSheetName = args[ARG_EXCEL_FOR_REPLACE_SHEET_INDEX];
 
-		// args[4]
-		argExcelForReplaceRowNum = Integer.parseInt(args[4]);
+		// ARG_EXCEL_FOR_REPLACE_ROW_NUM_INDEX
+		argExcelForReplaceRowNum = Integer.parseInt(args[ARG_EXCEL_FOR_REPLACE_ROW_NUM_INDEX]);
 		if (argExcelForReplaceRowNum <= 0) {
-			log.error(String.format("[4] positive integer is allowed, but received %d.",
-					argExcelForReplaceRowNum));
+			log.error(String.format("[%d] positive integer is allowed, but received %d.",
+					ARG_EXCEL_FOR_REPLACE_ROW_NUM_INDEX, argExcelForReplaceRowNum));
 			return false;
 		}
 
