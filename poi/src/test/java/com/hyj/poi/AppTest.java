@@ -1,5 +1,7 @@
 package com.hyj.poi;
 
+import org.apache.log4j.Logger;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -8,6 +10,7 @@ import junit.framework.TestSuite;
  * Unit test for simple App.
  */
 public class AppTest extends TestCase {
+	private static Logger log = Logger.getLogger(AppTest.class.getName());
 	/**
 	 * Create the test case
 	 *
@@ -29,5 +32,6 @@ public class AppTest extends TestCase {
 	 */
 	public void testApp() {
 		assertTrue(true);
+		log.info("#### 1");
 	}
 }
