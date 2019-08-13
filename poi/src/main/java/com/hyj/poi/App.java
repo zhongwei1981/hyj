@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 public class App {
 	private static Logger log = Logger.getLogger(App.class.getName());
 
-	private static final String EXCEL_SUFFIX = ".xls";
 	private static final String WORD_SUFFIX = ".doc";
 
 	private static final int ARG_WORK_DIR_INDEX = 0;
@@ -45,14 +44,14 @@ public class App {
 		}
 
 		// Excel for replace
-		String excelForReplaceFilePath = getFilePath(argExcelForReplaceName, EXCEL_SUFFIX);
+		String excelForReplaceFilePath = getFilePath(argExcelForReplaceName);
 		log.info(String.format("#### (%s, %s)", excelForReplaceFilePath, argExcelForReplaceSheetName));
 		ExcelSheetForReplace excelSheetForReplace = new ExcelSheetForReplace(excelForReplaceFilePath, argExcelForReplaceSheetName);
 		HashMap<String, ReplaceData> replaceDataMap = excelSheetForReplace.getReplaceDataMap(argExcelForReplaceRowNum);
 		excelSheetForReplace.close();
 
 		// Excel of Data
-		String excelOfDataFilePath = getFilePath(argExcelOfDataName, EXCEL_SUFFIX);
+		String excelOfDataFilePath = getFilePath(argExcelOfDataName);
 		log.info(String.format("#### (%s)", excelOfDataFilePath));
 		ExcelOfData excelOfData = new ExcelOfData(excelOfDataFilePath);
 		HashMap<String, String> replaceMap = excelOfData.getReplaceMap(replaceDataMap);
@@ -96,23 +95,9 @@ public class App {
 
 		// ARG_EXCEL_OF_DATA_INDEX
 		argExcelOfDataName = args[ARG_EXCEL_OF_DATA_INDEX];
-		if (!argExcelOfDataName.endsWith(EXCEL_SUFFIX)) {
-			log.error(String.format("[%d] Only %s is allowed, but received %s.",
-					ARG_EXCEL_OF_DATA_INDEX, EXCEL_SUFFIX, argExcelOfDataName));
-			return false;
-		}
-		argExcelOfDataName = argExcelOfDataName.substring(0,
-				argExcelOfDataName.length() - EXCEL_SUFFIX.length());
 
 		// ARG_EXCEL_FOR_REPLACE_INDEX
 		argExcelForReplaceName = args[ARG_EXCEL_FOR_REPLACE_INDEX];
-		if (!argExcelForReplaceName.endsWith(EXCEL_SUFFIX)) {
-			log.error(String.format("[%d] Only %s is allowed, but received %s.",
-					ARG_EXCEL_FOR_REPLACE_INDEX, EXCEL_SUFFIX, argExcelForReplaceName));
-			return false;
-		}
-		argExcelForReplaceName = argExcelForReplaceName.substring(0,
-				argExcelForReplaceName.length() - EXCEL_SUFFIX.length());
 
 		// ARG_EXCEL_FOR_REPLACE_INDEX
 		argExcelForReplaceSheetName = args[ARG_EXCEL_FOR_REPLACE_SHEET_INDEX];
@@ -128,7 +113,12 @@ public class App {
 		return true;
 	}
 
+	@Deprecated
 	private static String getFilePath(String fileName, String suffix) {
 		return argWorkDir + fileName + suffix;
+	}
+
+	private static String getFilePath(String fileName) {
+		return argWorkDir + fileName;
 	}
 }

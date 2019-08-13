@@ -5,20 +5,31 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelOfData {
 	private static Logger log = Logger.getLogger(ExcelOfData.class.getName());
 
+	private static final String EXCEL_SUFFIX = ".xls";
+	private static final String EXCEL_X_SUFFIX = ".xlsx";
+
 	FileInputStream fis;
-	HSSFWorkbook wb;
+	Workbook wb;
 
 	public ExcelOfData(String path) throws IOException {
 		fis = new FileInputStream(path);
-		wb = new HSSFWorkbook(fis);
+		if (path.endsWith(EXCEL_SUFFIX)) {
+			wb = new HSSFWorkbook(fis);
+		} else if (path.endsWith(EXCEL_X_SUFFIX)) {
+			wb = new XSSFWorkbook(fis);
+		} else {
+			throw new RuntimeException("Unsupported path = " + path);
+		}
 	}
 
 	public void close() throws IOException {
@@ -44,8 +55,8 @@ public class ExcelOfData {
 		log.info(String.format("#### (%s, %d, %d)", sheetName, row, col));
 		String ret = "";
 
-		HSSFSheet sheet = wb.getSheet(sheetName);
-		HSSFCell cell = sheet.getRow(row).getCell(col);
+		Sheet sheet = wb.getSheet(sheetName);
+		Cell cell = sheet.getRow(row).getCell(col);
 		CellType type = cell.getCellTypeEnum();
 		switch (type) {
 		case NUMERIC:
