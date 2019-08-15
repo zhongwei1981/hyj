@@ -2,6 +2,8 @@ package com.hyj.poi;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
@@ -14,6 +16,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelOfData {
 	private static Logger log = Logger.getLogger(ExcelOfData.class.getName());
+
+	private static NumberFormat NF6 = NumberFormat.getNumberInstance();
+
+	static {
+		NF6.setMaximumFractionDigits(6);
+		NF6.setRoundingMode(RoundingMode.UP);
+	}
 
 	private static final String EXCEL_SUFFIX = ".xls";
 	private static final String EXCEL_X_SUFFIX = ".xlsx";
@@ -44,8 +53,9 @@ public class ExcelOfData {
 			log.info(String.format("#### (%s, %s, %d, %d)", k, v.sheetName, v.row, v.col));
 
 			String val = getSheetCellAsString(v.sheetName, v.row, v.col);
-			replaceMap.put(k, val);
-			log.info(String.format("#### (%s, %s) <- %s, %d, %d", k, val, v.sheetName, v.row, v.col));
+			String formatVal = NF6.format(Double.parseDouble(val));
+			replaceMap.put(k, formatVal);
+			log.info(String.format("#### (%s, %s) <- %s, %d, %d = %s", k, formatVal, v.sheetName, v.row, v.col, val));
 		});
 
 		return replaceMap;

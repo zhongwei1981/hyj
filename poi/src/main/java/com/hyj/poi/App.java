@@ -11,6 +11,7 @@ public class App {
 	private static Logger log = Logger.getLogger(App.class.getName());
 
 	private static final String WORD_SUFFIX = ".doc";
+	private static final String WORD_X_SUFFIX = ".docx";
 
 	private static final int ARG_WORK_DIR_INDEX = 0;
 	private static final int ARG_WORD_TEMPLATE_INDEX = 1;
@@ -58,14 +59,27 @@ public class App {
 		excelOfData.close();
 
 		// Word template
-		String wordTemplatePath = getFilePath(argWordTemplateName, WORD_SUFFIX);
-		String newWordName = argWordTemplateName + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-		String newPath = getFilePath(newWordName, WORD_SUFFIX);
+		int indexOfSuffix = argWordTemplateName.lastIndexOf(".");
+		String strWordTemp = argWordTemplateName.substring(0, indexOfSuffix);
+		String strWordTempSuffix = argWordTemplateName.substring(indexOfSuffix);
+
+		String wordTemplatePath = getFilePath(argWordTemplateName);
+		String newWordName = strWordTemp + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		String newPath = getFilePath(newWordName + strWordTempSuffix);
 		log.info(String.format("#### (%s)", wordTemplatePath));
-		WordTemplate wordTemplate = new WordTemplate(wordTemplatePath);
-		wordTemplate.replaceRange(replaceMap);
-		wordTemplate.saveAs(newPath);
-		wordTemplate.close();
+		if (strWordTempSuffix.equalsIgnoreCase(WORD_SUFFIX)) {
+			WordTemplateOfHWPF wt = new WordTemplateOfHWPF(wordTemplatePath);
+			wt.replace(replaceMap);
+			wt.saveAs(newPath);
+			wt.close();
+		} else if (strWordTempSuffix.equalsIgnoreCase(WORD_X_SUFFIX)) {
+			WordTemplateOfXWPF wt = new WordTemplateOfXWPF(wordTemplatePath);
+			wt.replace(replaceMap);
+			wt.saveAs(newPath);
+			wt.close();
+		} else {
+			throw new RuntimeException("Unsupported path = " + argWordTemplateName);
+		}
 
 		// Done
 		log.info("done");
@@ -85,13 +99,6 @@ public class App {
 
 		// ARG_WORD_TEMPLATE_INDEX
 		argWordTemplateName = args[ARG_WORD_TEMPLATE_INDEX];
-		if (!argWordTemplateName.endsWith(WORD_SUFFIX)) {
-			log.error(String.format("[%d] Only %s is allowed, but received %s.",
-					ARG_WORD_TEMPLATE_INDEX, WORD_SUFFIX, argWordTemplateName));
-			return false;
-		}
-		argWordTemplateName = argWordTemplateName.substring(0,
-				argWordTemplateName.length() - WORD_SUFFIX.length());
 
 		// ARG_EXCEL_OF_DATA_INDEX
 		argExcelOfDataName = args[ARG_EXCEL_OF_DATA_INDEX];

@@ -3,28 +3,19 @@ package com.hyj.poi;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.RoundingMode;
-import java.text.NumberFormat;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.Range;
 
-public class WordTemplate {
-	private static Logger log = Logger.getLogger(WordTemplate.class.getName());
-
-	private static NumberFormat NF6 = NumberFormat.getNumberInstance();
-
-	static {
-		NF6.setMaximumFractionDigits(6);
-		NF6.setRoundingMode(RoundingMode.UP);
-	}
+public class WordTemplateOfHWPF {
+	private static Logger log = Logger.getLogger(WordTemplateOfHWPF.class.getName());
 
 	FileInputStream fis;
 	HWPFDocument document;
 
-	public WordTemplate(String path) throws IOException {
+	public WordTemplateOfHWPF(String path) throws IOException {
 		fis = new FileInputStream(path);
 		document = new HWPFDocument(fis);
 	}
@@ -34,12 +25,11 @@ public class WordTemplate {
 		fis.close();
 	}
 
-	public void replaceRange(HashMap<String, String> replaceMap) {
+	public void replace(HashMap<String, String> replaceMap) {
 		Range range = document.getRange();
 		replaceMap.forEach((k, v) -> {
-			String val = NF6.format(Double.parseDouble(v));
-			log.info(String.format("#### repalce (%s, %s)", k, val));
-			range.replaceText(k, val);
+			log.info(String.format("#### [doc] repalce (%s, %s)", k, v));
+			range.replaceText(k, v);
 		});
 	}
 
