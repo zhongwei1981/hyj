@@ -10,9 +10,6 @@ import org.apache.log4j.Logger;
 public class App {
 	private static Logger log = Logger.getLogger(App.class.getName());
 
-	private static final String WORD_SUFFIX = ".doc";
-	private static final String WORD_X_SUFFIX = ".docx";
-
 	private static final int ARG_WORK_DIR_INDEX = 0;
 	private static final int ARG_WORD_TEMPLATE_INDEX = 1;
 	private static final int ARG_EXCEL_OF_DATA_INDEX = 2;
@@ -67,12 +64,12 @@ public class App {
 		String newWordName = strWordTemp + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String newPath = getFilePath(newWordName + strWordTempSuffix);
 		log.info(String.format("#### (%s)", wordTemplatePath));
-		if (strWordTempSuffix.equalsIgnoreCase(WORD_SUFFIX)) {
+		if (strWordTempSuffix.equalsIgnoreCase(Common.WORD_SUFFIX)) {
 			WordTemplateOfHWPF wt = new WordTemplateOfHWPF(wordTemplatePath);
 			wt.replace(replaceMap);
 			wt.saveAs(newPath);
 			wt.close();
-		} else if (strWordTempSuffix.equalsIgnoreCase(WORD_X_SUFFIX)) {
+		} else if (strWordTempSuffix.equalsIgnoreCase(Common.WORD_X_SUFFIX)) {
 			WordTemplateOfXWPF wt = new WordTemplateOfXWPF(wordTemplatePath);
 			wt.replace(replaceMap);
 			wt.saveAs(newPath);

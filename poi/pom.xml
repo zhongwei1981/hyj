@@ -50,21 +50,12 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-scratchpad</artifactId>
-			<version>3.17</version>
+			<version>4.1.0</version>
 		</dependency>
 		<dependency>
-			<!-- why does the previous build not need this??? org.eclipse.birt.runtime-4.2.0.jar  include this??? -->
-			<!-- poi-ooxml-3.8.jar depends on the following jar file: -->
-			<!-- dom4j-1.6.1.jar -->
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>3.17</version>
-			<exclusions>
-				<exclusion>
-					<groupId>stax</groupId>
-					<artifactId>stax-api</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>4.1.0</version>
 		</dependency>
 	</dependencies>
 

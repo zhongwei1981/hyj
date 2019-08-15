@@ -15,24 +15,19 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class ExcelSheetForReplace {
 	private static Logger log = Logger.getLogger(ExcelSheetForReplace.class.getName());
 
-	private static final String EXCEL_SUFFIX = ".xls";
-	private static final String EXCEL_X_SUFFIX = ".xlsx";
-
 	private static int COL_INDEX_KEY = 0;
 	private static int COL_INDEX_REPLACE_SHEET = 1;
 	private static int COL_INDEX_REPLACE_ROW_COL = 2;
 
 	FileInputStream fis;
 	Workbook wb;
-	//HSSFSheet sheet;
-	//XSSFSheet sheet;
 	Sheet sheet;
 
 	public ExcelSheetForReplace(String path, String sheetName) throws IOException {
 		fis = new FileInputStream(path);
-		if (path.endsWith(EXCEL_SUFFIX)) {
+		if (path.endsWith(Common.EXCEL_SUFFIX)) {
 			wb = new HSSFWorkbook(fis);
-		} else if (path.endsWith(EXCEL_X_SUFFIX)) {
+		} else if (path.endsWith(Common.EXCEL_X_SUFFIX)) {
 			wb = new XSSFWorkbook(fis);
 		} else {
 			throw new RuntimeException("Unsupported path = " + path);
@@ -52,8 +47,20 @@ public class ExcelSheetForReplace {
 			String key = getSheetCellAsString(sheet, row, COL_INDEX_KEY);
 			String replaceSheet = getSheetCellAsString(sheet, row, COL_INDEX_REPLACE_SHEET);
 			String replaceRowCol = getSheetCellAsString(sheet, row, COL_INDEX_REPLACE_ROW_COL);
-			//log.info(String.format("#### %d: (%s, %s)", row, key, val));
-			replaceDataMap.put(key, new ReplaceData(replaceSheet, replaceRowCol));
+
+			// verify key is wrapped by specified string
+			if (key.startsWith(Common.START_KEY) && key.endsWith(Common.END_KEY)) {
+				key = key.replaceAll(Common.START_KEY, "");
+				key = key.replaceAll(Common.END_KEY, "");
+			} else {
+				throw new RuntimeException(String.format(
+						"Unexpected key = %s, which is expected to be wrapped by (%s & %s)",
+						key, Common.START_KEY, Common.END_KEY));
+			}
+			ReplaceData data = new ReplaceData(replaceSheet, replaceRowCol);
+
+			replaceDataMap.put(key, data);
+			log.info(String.format("(%s <- %s)", key, data.getContent()));
 		}
 
 		return replaceDataMap;

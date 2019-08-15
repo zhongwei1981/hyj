@@ -9,6 +9,8 @@ public class ReplaceData {
 	public int row;
 	public int col;
 
+	private String strRowCol;	//for backup only
+
 	/**
 	 *
 	 * @param sheetName
@@ -20,6 +22,10 @@ public class ReplaceData {
 		this.col = strRowCol.charAt(0) - 'A';
 		this.row = Integer.parseInt(strRowCol.substring(1)) - 1;
 
-		log.info(String.format("#### (%s, %d, %d) <- %s", sheetName, row, col, strRowCol));
+		this.strRowCol = strRowCol;
+	}
+
+	public String getContent() {
+		return String.format("(%s, %d, %d: %s)", sheetName, row, col, strRowCol);
 	}
 }

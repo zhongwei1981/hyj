@@ -50,19 +50,17 @@ public class ExcelOfData {
 		HashMap<String, String> replaceMap = new HashMap<>();
 
 		replaceDataMap.forEach((k, v) -> {
-			log.info(String.format("#### (%s, %s, %d, %d)", k, v.sheetName, v.row, v.col));
-
 			String val = getSheetCellAsString(v.sheetName, v.row, v.col);
 			String formatVal = NF6.format(Double.parseDouble(val));
 			replaceMap.put(k, formatVal);
-			log.info(String.format("#### (%s, %s) <- %s, %d, %d = %s", k, formatVal, v.sheetName, v.row, v.col, val));
+			log.info(String.format("(%s, %s) <- (%s, %d, %d: %s)", k, formatVal, v.sheetName, v.row, v.col, val));
 		});
 
 		return replaceMap;
 	}
 
 	private String getSheetCellAsString(String sheetName, int row, int col) {
-		log.info(String.format("#### (%s, %d, %d)", sheetName, row, col));
+		//log.info(String.format("#### (%s, %d, %d)", sheetName, row, col));
 		String ret = "";
 
 		Sheet sheet = wb.getSheet(sheetName);
